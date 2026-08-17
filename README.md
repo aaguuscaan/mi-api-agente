@@ -1,99 +1,62 @@
-API de producción y monitoreo activo
-📌 Descripción
+````markdown
+# 🚀 Pre-entrega 7: API de producción y monitoreo activo
 
-Este proyecto implementa una API REST asíncrona construida con FastAPI que expone un agente autónomo basado en LangGraph, capaz de ejecutar tareas mediante un flujo de razonamiento cíclico.
+## 📌 Descripción
 
-La API está diseñada para trabajar de forma no bloqueante: cuando el usuario crea una tarea, recibe inmediatamente un job_id que permite consultar posteriormente su estado.
+Este proyecto implementa una **API REST asíncrona** construida con **FastAPI** que expone un agente autónomo basado en **LangGraph**, capaz de ejecutar tareas mediante un flujo de razonamiento cíclico.
 
-Además, el sistema incorpora:
+La **API** está diseñada para trabajar de forma **no bloqueante**: cuando el usuario crea una tarea, recibe inmediatamente un `job_id` que permite consultar posteriormente su estado.
 
-⚡ Ejecución asíncrona de tareas.
-🧠 Agente autónomo con LangGraph.
-💾 Persistencia de estados y checkpoints mediante Redis.
-🧑‍⚖️ Human-in-the-loop (HITL) para tareas que requieren aprobación.
-📊 Observabilidad mediante LangSmith / Arize Phoenix.
-🐳 Docker Compose para ejecutar Redis y la API.
-❤️ Endpoint de health check.
-🔄 Manejo de errores y estado FAILED.
-🏗️ Arquitectura
+### Características principales
 
-El funcionamiento general del sistema puede representarse de la siguiente manera:
+- ⚡ Ejecución asíncrona de tareas.
+- 🧠 Agente autónomo con LangGraph.
+- 💾 Persistencia de estados y checkpoints mediante Redis.
+- 🧑‍⚖️ Human-in-the-loop (HITL) para tareas que requieren aprobación.
+- 📊 Observabilidad mediante LangSmith / Arize Phoenix.
+- 🐳 Docker Compose para ejecutar Redis y la API.
+- ❤️ Endpoint de health check.
+- 🔄 Manejo de errores y estado `FAILED`.
 
+---
+
+## 🏗️ Arquitectura
+
+```mermaid
 flowchart TD
-    A[👤 Cliente] -->|POST /tasks| B[🚀 FastAPI]
-    
-    B --> C[🆔 Genera job_id]
-    C --> D[📥 Encola tarea]
-    D --> E[📤 Responde inmediatamente]
+    A[Cliente] -->|POST /tasks| B[FastAPI]
+    B --> C[Genera job_id]
+    C --> D[Encola tarea]
+    D --> E[Responde inmediatamente]
 
-    D --> F[⚙️ Worker]
-    F --> G[🧠 LangGraph]
+    D --> F[Worker]
+    F --> G[LangGraph]
 
     G --> H{¿Requiere aprobación?}
 
-    H -->|No| I[🔧 Tools / LLM]
-    H -->|Sí| J[⏸️ HITL]
+    H -->|No| I[Tools / LLM]
+    H -->|Sí| J[HITL]
 
-    J --> K{👤 Aprobación humana}
+    J --> K{Aprobación humana}
 
     K -->|Aprobado| I
-    K -->|Rechazado| L[❌ CANCELLED]
+    K -->|Rechazado| L[CANCELLED]
 
-    I --> M[✅ DONE]
-    I -->|Error| N[❌ FAILED]
+    I --> M[DONE]
+    I -->|Error| N[FAILED]
 
-    F --> O[(💾 Redis)]
+    F --> O[Redis]
     G --> O
     J --> O
 
-    G --> P[📊 LangSmith / Phoenix]
-🔄 Flujo de ejecución
+    G --> P[LangSmith / Phoenix]
+````
 
-El sistema funciona mediante un flujo desacoplado entre la API y la ejecución de las tareas.
+---
 
-1. 📥 Creación de tarea
+## 📁 Estructura del proyecto
 
-El cliente realiza:
-
-POST /tasks
-
-La API genera un job_id, registra la tarea como PENDING y devuelve la respuesta sin esperar a que termine la ejecución.
-
-2. ⚙️ Ejecución
-
-El worker toma la tarea y cambia su estado a:
-
-RUNNING
-
-Luego ejecuta el grafo de LangGraph.
-
-3. 🧠 Procesamiento del agente
-
-El agente puede utilizar herramientas y modelos de lenguaje para completar la tarea.
-
-4. 🧑‍⚖️ Human-in-the-loop
-
-Si la tarea requiere una decisión humana, el grafo se pausa y pasa al estado:
-
-PENDING_APPROVAL
-
-La ejecución queda detenida hasta recibir una aprobación o rechazo mediante:
-
-POST /tasks/{job_id}/approve
-5. ✅ Finalización
-
-Si todo sale correctamente:
-
-DONE
-
-Si ocurre una excepción:
-
-FAILED
-
-Si una tarea que esperaba aprobación es rechazada:
-
-CANCELLED
-📁 Estructura del proyecto
+```text
 mi-api-agente/
 │
 ├── app/
@@ -106,460 +69,305 @@ mi-api-agente/
 │   └── tools.py             # Herramientas del agente
 │
 ├── screenshots/             # Capturas del dashboard
-│   └── .gitkeep             # Mantiene la carpeta en Git
+│   └── .gitkeep
 │
-├── .env.example             # Variables de entorno
-├── .gitignore               # Archivos ignorados por Git
-├── docker-compose.yml       # Redis + API
-├── requirements.txt         # Dependencias
-└── README.md                # Documentación
-🛠️ Tecnologías utilizadas
-Tecnología	Uso
-🐍 Python	Lenguaje principal
-⚡ FastAPI	API REST asíncrona
-🧠 LangGraph	Orquestación del agente
-🔗 LangChain	Herramientas y modelos
-🤖 OpenAI	Modelo GPT-4o
-💾 Redis	Persistencia de estados y checkpoints
-📊 LangSmith	Observabilidad
-🔬 Arize Phoenix	Observabilidad y trazas
-🐳 Docker Compose	Infraestructura
-🚀 Uvicorn	Servidor ASGI
-📡 Endpoints
-1. POST /tasks
+├── .env.example
+├── .gitignore
+├── docker-compose.yml
+├── requirements.txt
+└── README.md
+```
 
-Crea una nueva tarea.
+---
 
-La API no espera a que termine la ejecución, sino que devuelve inmediatamente un identificador de trabajo.
+## 📡 Endpoints
 
-Request
+### `POST /tasks`
+
+Crea una nueva tarea y devuelve un `job_id`.
+
+**Request:**
+
+```http
 POST /tasks
 Content-Type: application/json
+```
 
-Ejemplo:
+**Body:**
 
+```json
 {
-  "prompt": "Analizá los pedidos del cliente 102"
+  "query": "Analizá los pedidos del cliente 102"
 }
-Response
+```
+
+**Response:**
+
+```json
 {
   "job_id": "abc123",
   "status": "PENDING"
 }
+```
 
-El job_id se utiliza posteriormente para consultar o controlar la tarea.
+---
 
-2. GET /tasks/{job_id}
+### `GET /tasks/{job_id}`
 
-Permite consultar el estado actual de una tarea.
+Consulta el estado de una tarea.
 
-Ejemplo:
+**Request:**
 
+```http
 GET /tasks/abc123
+```
 
-Response:
+**Response — en ejecución:**
 
+```json
 {
   "job_id": "abc123",
   "status": "RUNNING"
 }
+```
 
-Cuando finaliza:
+**Response — finalizada:**
 
+```json
 {
   "job_id": "abc123",
   "status": "DONE",
   "result": "Tarea completada correctamente"
 }
-3. POST /tasks/{job_id}/approve
+```
 
-Permite aprobar o rechazar una tarea que está esperando intervención humana.
+---
 
-Aprobar
+### `POST /tasks/{job_id}/approve`
+
+Aprueba o rechaza una tarea en espera de aprobación humana.
+
+**Request:**
+
+```http
 POST /tasks/abc123/approve
 Content-Type: application/json
+```
+
+**Body — aprobar:**
+
+```json
 {
   "approved": true
 }
-Rechazar
+```
+
+**Body — rechazar:**
+
+```json
 {
   "approved": false
 }
+```
 
-La decisión humana permite que el flujo continúe o finalice.
+---
 
-4. GET /health
+### `GET /health`
 
-Comprueba el estado de la API y la conexión con Redis.
+Verifica el estado de la API y Redis.
 
+**Request:**
+
+```http
 GET /health
+```
 
-Ejemplo de respuesta:
+**Response:**
 
+```json
 {
   "status": "ok",
   "redis": "connected"
 }
+```
 
-Este endpoint permite verificar rápidamente si los servicios principales están funcionando correctamente.
+---
 
-📊 Estados de las tareas
+## 📊 Estados de las tareas
 
-Una tarea puede pasar por los siguientes estados:
+| Estado             | Descripción                     |
+| ------------------ | ------------------------------- |
+| `PENDING`          | 📥 Tarea encolada               |
+| `RUNNING`          | ⚙️ Tarea en ejecución           |
+| `DONE`             | ✅ Tarea completada exitosamente |
+| `FAILED`           | ❌ La tarea falló                |
+| `PENDING_APPROVAL` | ⏸️ Esperando aprobación humana  |
+| `APPROVED`         | ✅ Tarea aprobada                |
+| `CANCELLED`        | 🚫 Tarea rechazada              |
 
-Estado	Descripción
-PENDING	📥 Tarea encolada
-RUNNING	⚙️ Tarea en ejecución
-DONE	✅ Tarea completada exitosamente
-FAILED	❌ La tarea falló
-PENDING_APPROVAL	⏸️ Esperando aprobación humana
-APPROVED	✅ Tarea aprobada
-CANCELLED	🚫 Tarea rechazada
-Flujo simplificado
-PENDING
-   │
-   ▼
-RUNNING
-   │
-   ├───────────────► FAILED
-   │
-   ▼
-PENDING_APPROVAL
-   │
-   ├── aprobado ──► APPROVED ──► DONE
-   │
-   └── rechazado ─► CANCELLED
-🧑‍⚖️ Human-in-the-loop (HITL)
+---
 
-El sistema incorpora un mecanismo Human-in-the-loop para evitar que determinadas tareas críticas sean ejecutadas automáticamente sin supervisión.
+## ⚙️ Instalación y ejecución
 
-Cuando el agente llega al nodo HITL, la ejecución se pausa:
+### 1. Clonar el repositorio
 
-Agente
-  ↓
-¿Tarea crítica?
-  ↓
-Sí
-  ↓
-PENDING_APPROVAL
-  ↓
-⏸️ Ejecución pausada
-  ↓
-👤 Decisión humana
-  ↓
-┌───────────────┐
-│               │
-▼               ▼
-APROBAR       RECHAZAR
-│               │
-▼               ▼
-Continuar     CANCELLED
-
-La aprobación se realiza externamente mediante:
-
-POST /tasks/{job_id}/approve
-
-Esto permite separar la toma de decisiones automática de las acciones que requieren supervisión humana.
-
-💾 Persistencia con Redis
-
-Redis se utiliza para mantener el estado de las tareas y los checkpoints necesarios para el funcionamiento del agente.
-
-Esto permite que el sistema conserve información como:
-
-job_id
-Estado actual.
-Resultado.
-Errores.
-Checkpoints del grafo.
-Estado necesario para continuar una ejecución pausada.
-
-La persistencia es especialmente importante para HITL, ya que el agente puede quedar pausado esperando una decisión externa.
-
-⚠️ Manejo de errores
-
-Si durante la ejecución ocurre una excepción, la tarea debe pasar a:
-
-FAILED
-
-Por ejemplo:
-
-PENDING
-   ↓
-RUNNING
-   ↓
-❌ Excepción
-   ↓
-FAILED
-
-Esto permite consultar posteriormente el estado de una tarea fallida mediante:
-
-GET /tasks/{job_id}
-📊 Observabilidad
-
-El proyecto incorpora herramientas de observabilidad para poder analizar la ejecución del agente.
-
-Se utilizan:
-
-LangSmith
-Arize Phoenix
-
-Estas herramientas permiten visualizar información relacionada con las ejecuciones y las trazas del agente.
-
-La configuración se encuentra centralizada en:
-
-app/observability.py
-📸 Capturas del dashboard
-
-Las capturas relacionadas con la observabilidad deben almacenarse en:
-
-screenshots/
-
-Por ejemplo:
-
-screenshots/
-├── dashboard.png
-├── trace.png
-└── execution.png
-
-Estas capturas sirven como evidencia visual de las trazas generadas por el sistema.
-
-⚠️ Actualmente la carpeta screenshots/ puede estar vacía. Para completar el punto de observabilidad de la entrega, se deben agregar las capturas correspondientes al dashboard utilizado.
-
-🐳 Docker Compose
-
-El proyecto utiliza Docker Compose para levantar los servicios necesarios.
-
-La configuración se encuentra en:
-
-docker-compose.yml
-
-El objetivo principal es ejecutar:
-
-┌───────────────┐
-│   Docker      │
-│               │
-│ ┌───────────┐ │
-│ │ FastAPI   │ │
-│ └─────┬─────┘ │
-│       │       │
-│ ┌─────▼─────┐ │
-│ │   Redis   │ │
-│ └───────────┘ │
-└───────────────┘
-⚙️ Instalación y configuración
-1. Clonar el repositorio
-git clone <URL_DEL_REPOSITORIO>
+```bash
+git clone <https://github.com/aaguuscaan/mi-api-agente>
 cd mi-api-agente
+```
 
-Reemplazá <URL_DEL_REPOSITORIO> por la URL real de tu repositorio.
+### 2. Crear entorno virtual
 
-2. Crear el archivo .env
+```bash
+python -m venv venv
+```
 
-Copiá el archivo de ejemplo:
+**Linux / macOS:**
 
-Windows
-copy .env.example .env
-Linux / macOS
-cp .env.example .env
+```bash
+source venv/bin/activate
+```
 
-Después completá las variables necesarias.
+**Windows:**
 
-Ejemplo:
+```bash
+venv\Scripts\activate
+```
 
-OPENAI_API_KEY=tu_api_key
-LANGCHAIN_API_KEY=tu_api_key
-LANGCHAIN_TRACING_V2=true
-LANGCHAIN_PROJECT=pre-entrega-7
+### 3. Instalar dependencias
 
-Las variables exactas dependen de la configuración utilizada en observability.py.
-
-🔐 Seguridad de variables de entorno
-
-No subas nunca el archivo .env a GitHub.
-
-El repositorio debe contener:
-
-.env.example
-
-pero no:
-
-.env
-
-El .env.example debe contener solamente nombres de variables y valores de ejemplo.
-
-Por ejemplo:
-
-OPENAI_API_KEY=
-LANGCHAIN_API_KEY=
-LANGCHAIN_TRACING_V2=true
-LANGCHAIN_PROJECT=
-🚨 Nunca incluyas en el repositorio:
-API keys.
-Tokens.
-Contraseñas.
-Credenciales de Redis.
-Credenciales de servicios externos.
-🐳 Ejecutar con Docker Compose
-
-Con Docker Desktop iniciado, ejecutá:
-
-docker compose up --build
-
-Esto construirá la imagen de la API y levantará los servicios definidos en docker-compose.yml.
-
-Para ejecutar los servicios en segundo plano:
-
-docker compose up --build -d
-
-Para detenerlos:
-
-docker compose down
-🐍 Ejecutar localmente
-
-Si querés ejecutar la API sin Docker para el servidor, primero instalá las dependencias:
-
+```bash
 pip install -r requirements.txt
+```
 
-Luego iniciá Uvicorn:
+### 4. Configurar variables de entorno
 
+```bash
+cp .env.example .env
+```
+
+Editar `.env` con tus credenciales.
+
+### 5. Ejecutar la API
+
+```bash
 uvicorn app.main:app --reload
+```
 
-La API quedará disponible en:
+La API estará disponible en:
 
+```text
 http://localhost:8000
-📚 Documentación automática de FastAPI
+```
 
-FastAPI genera automáticamente documentación interactiva.
+---
 
-Una vez iniciada la API, podés acceder a:
+## 📦 Dependencias
 
-http://localhost:8000/docs
+```text
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+redis>=4.5.0
+langgraph>=0.0.20
+langchain>=0.1.0
+langchain-openai>=0.1.0
+python-dotenv>=0.1.0
+pydantic>=2.0.0
+langsmith>=0.0.50
+```
 
-También está disponible la documentación alternativa:
+---
 
-http://localhost:8000/redoc
+## 🐳 Docker Compose
 
-Desde /docs podés probar los endpoints directamente sin utilizar una herramienta externa.
+El proyecto incluye un archivo `docker-compose.yml` para ejecutar Redis y la API mediante Docker Compose.
 
-🧪 Ejemplos de uso
-Crear una tarea
-curl -X POST http://localhost:8000/tasks \
-  -H "Content-Type: application/json" \
-  -d "{\"prompt\":\"Analizá los pedidos del cliente 102\"}"
+Para construir e iniciar los servicios:
 
-Respuesta:
+```bash
+docker compose up --build
+```
 
-{
-  "job_id": "abc123",
-  "status": "PENDING"
-}
-Consultar una tarea
-curl http://localhost:8000/tasks/abc123
+Para ejecutarlos en segundo plano:
 
-Respuesta:
+```bash
+docker compose up -d --build
+```
 
-{
-  "job_id": "abc123",
-  "status": "RUNNING"
-}
-Aprobar una tarea
-curl -X POST http://localhost:8000/tasks/abc123/approve \
-  -H "Content-Type: application/json" \
-  -d "{\"approved\":true}"
-Rechazar una tarea
-curl -X POST http://localhost:8000/tasks/abc123/approve \
-  -H "Content-Type: application/json" \
-  -d "{\"approved\":false}"
-Verificar el estado de la API
-curl http://localhost:8000/health
+---
+
+## ❤️ Health Check
+
+Una vez iniciada la aplicación, se puede verificar que la API y Redis estén funcionando correctamente mediante:
+
+```http
+GET /health
+```
 
 Respuesta esperada:
 
+```json
 {
   "status": "ok",
   "redis": "connected"
 }
-🧩 Componentes principales
-app/main.py
+```
 
-Contiene la aplicación FastAPI y los endpoints HTTP.
+---
 
-Responsabilidades principales:
+## 📊 Observabilidad
 
-Crear tareas.
-Devolver job_id.
-Consultar estados.
-Gestionar aprobaciones.
-Exponer /health.
-app/graph.py
+El proyecto incorpora herramientas de observabilidad para monitorear la ejecución del agente y analizar sus trazas:
 
-Contiene el grafo principal del agente.
+* **LangSmith**
+* **Arize Phoenix**
 
-Se encarga de:
+Las trazas permiten observar el flujo de ejecución de LangGraph, incluyendo las herramientas utilizadas, los estados intermedios y posibles errores.
 
-Configurar LangGraph.
-Utilizar RedisSaver.
-Definir el flujo de ejecución.
-Integrar el nodo HITL.
-Gestionar checkpoints.
-app/worker.py
+Las capturas del dashboard pueden almacenarse en:
 
-Se ocupa de la ejecución de las tareas en segundo plano.
+```text
+screenshots/
+```
 
-Esto permite que:
+---
 
-POST /tasks
+## 🧑‍⚖️ Human-in-the-loop (HITL)
 
-no tenga que esperar a que el agente termine.
+Algunas tareas pueden requerir una aprobación humana antes de continuar con su ejecución.
 
-app/observability.py
+El flujo es:
 
-Centraliza la configuración relacionada con:
+```text
+PENDING
+   ↓
+RUNNING
+   ↓
+PENDING_APPROVAL
+   ↓
+   ├── APPROVED → continúa la ejecución → DONE
+   │
+   └── RECHAZADO → CANCELLED
+```
 
-LangSmith.
-Arize Phoenix.
-Trazas.
-Observabilidad de las ejecuciones.
-app/hitl.py
+Esto permite que el agente pueda detenerse temporalmente y esperar una decisión humana antes de ejecutar determinadas acciones.
 
-Contiene la lógica relacionada con la aprobación humana.
+---
 
-Permite pausar el flujo y esperar una decisión externa.
+## 🔄 Manejo de errores
 
-app/tools.py
+Si durante la ejecución ocurre un error, la tarea pasa al estado:
 
-Contiene las herramientas que puede utilizar el agente durante su ejecución.
+```text
+FAILED
+```
 
-📦 Dependencias
+Esto permite diferenciar entre:
 
-Las dependencias del proyecto están definidas en:
+* Tareas pendientes.
+* Tareas en ejecución.
+* Tareas esperando aprobación.
+* Tareas completadas.
+* Tareas rechazadas.
+* Tareas que fallaron.
 
-requirements.txt
-
-Para instalarlas:
-
-pip install -r requirements.txt
-
-Esto permite reproducir el entorno necesario para ejecutar la aplicación.
-
-🩺 Health Check
-
-El endpoint:
-
-GET /health
-
-permite comprobar el estado de los componentes principales.
-
-Ejemplo:
-
-{
-  "status": "ok",
-  "redis": "connected"
-}
-
-Este endpoint resulta útil para verificar que:
-
-La API está funcionando.
-Redis está disponible.
-La aplicación puede comunicarse con el sistema de persistencia.
