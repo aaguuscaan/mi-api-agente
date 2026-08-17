@@ -1,0 +1,12 @@
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+redis>=4.5.0
+langgraph>=0.0.20
+langchain>=0.1.0
+langchain-openai>=0.1.0
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+# Observabilidad (opcional)
+langsmith>=0.0.50
+# openinference-instrumentation-langchain>=0.1.0
+# arize-phoenix>=1.0.0
